@@ -1,8 +1,8 @@
 {
-  "name": "Word Table Converter Tool",
-  "short_name": "TConvrter",
-  "description": "A tool for converting word table into JSON.",
-  "start_url": "TConvrter_2026.html",
+  "name": "JSON Converter Tool",
+  "short_name": "JConvrter",
+  "description": "A tool for converting JSON files into word.",
+  "start_url": "JConvrter_2026.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
