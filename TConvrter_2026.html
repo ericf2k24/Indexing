@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<script>
+// How to use this tool:
+// This will convert word document index table files into JSON file
+// 
+
+
+</script>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
+    <style>
+        body { font-family: 'Times New Roman', Times, serif; padding: 10px; background-color: #f8f9fa; }
+        .card { max-width: 600px; margin: auto; background: white; padding: 10px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .input-group { margin-bottom: 10px; margin-right: 5px; }
+        h2 { margin-top: 0px; margin-bottom: 5px; color: #333; font-size: 14pt;}
+        label { display: block; font-weight: bold; font-size: 12px; margin-top: 0px;  margin-bottom: 5px; color: #444; }
+        input[type="file"] { width: 200px; padding: 5px; border-radius: 5px; }
+        input[type="text"] { width: 200px; padding: 5px; border: 1px solid #ddd; border-radius: 5px; }
+        /* input:hover { background: #8d8f90; } */
+        button { background: #f0f2f5; color: black; border: 1px solid black; padding: 8px; border-radius: 2px; cursor: pointer; font-size: 11px; }
+        button:hover { background: #8d8f90; }
+        #status { margin-top: 15px; font-size: 14px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Table Converter</h2>
+    <div class="input-group">
+        <label>Select File:</label>
+        <input type="file" id="docPicker" accept=".docx">
+    </div>
+    <div class="input-group">
+        <label>Output Filename:</label>
+        <input type="text" id="filename" value="J201_000">
+    </div>
+    <button onclick="processDoc()">Convert & Download</button>
+    <div id="status"></div>
+</div>
+
+<script>
+    async function processDoc() {
+        const fileInput = document.getElementById('docPicker');
+        const filenameInput = document.getElementById('filename').value || 'output';
+        const status = document.getElementById('status');
+
+        if (!fileInput.files[0]) {
+            alert("Please select a file.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const result = await mammoth.convertToHtml({ arrayBuffer: e.target.result });
+                const jsonData = parseTable(result.value);
+                
+                if (jsonData.length > 0) {
+                    saveFile(jsonData, filenameInput + ".json");
+                    status.innerHTML = `<span style="color: green;">✓ Converted ${jsonData.length} records successfully.</span>`;
+                } else {
+                    status.innerHTML = `<span style="color: red;">Header "MAIN SUBJECT ENTRY" not found in table.</span>`;
+                }
+            } catch (err) {
+                status.innerText = "Error parsing document.";
+            }
+        };
+        reader.readAsArrayBuffer(fileInput.files[0]);
+    }
+
+    function parseTable(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const rows = Array.from(doc.querySelectorAll('tr'));
+        
+        // 1. Find the index of the header row
+        const headerIndex = rows.findIndex(row => 
+            row.innerText.toUpperCase().includes("MAIN SUBJECT ENTRY")
+        );
+
+        if (headerIndex === -1) return [];
+
+        // 2. Start from headerIndex + 1, and end at rows.length - 1 (exclusive of last row)
+        const targetRows = rows.slice(headerIndex + 1, -1);
+
+        const data = targetRows.map(row => {
+            const cells = Array.from(row.querySelectorAll('td')).map(td => {
+            let html = td.innerHTML.trim();
+
+            // Remove outer <p> tags only
+            html = html.replace(/^<p>/i, '').replace(/<\/p>$/i, '');
+
+            return html;
+            });
+            
+            return {
+                "Main Subject (1)": `<b>${cells[0] || ""}</b>`,
+                "Dist-PL (2)": "<b>002B</b>",
+                "Activity (3)": cells[1] ? `<u>${cells[1]}</u>` : "",
+                "Sub-Topic (4)": cells[2] || "",
+                "Sub-Activity (5)": cells[3] || "",
+                "Cross-Reference (6)": cells[4] || "",
+                "Action (7)": "",
+                "Names (8)": cells[5] || "",
+                "J. No. (9)": ""
+            };
+        });
+
+        // 3. Sort alphabetically by "Main Subject (1)"
+        return data.sort((a, b) => {
+            // Remove <b> tags for a clean string comparison
+            const subjectA = a["Main Subject (1)"].replace(/<\/?[^>]+(>|$)/g, "").toLowerCase();
+            const subjectB = b["Main Subject (1)"].replace(/<\/?[^>]+(>|$)/g, "").toLowerCase();
+            
+            if (subjectA < subjectB) return -1;
+            if (subjectA > subjectB) return 1;
+            return 0;
+        });
+    }
+
+    function saveFile(data, filename) {
+        // 1. Force the type to application/octet-stream so iOS treats it as a generic binary file download rather than a displayable JSON text string
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/octet-stream" });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        
+        // 2. iOS 26 Safari strictly ignores clicks on elements floating in-memory. It must exist on the page body.
+        document.body.appendChild(link);
+        link.click();
+        
+        // 3. Clean up the DOM element and delay the URL revocation to give iOS space to process the filesystem save
+        document.body.removeChild(link);
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+        }, 200);
+    }
+</script>
+
+</body>
+</html>
