@@ -1,5 +1,5 @@
 {
-  "name": "Word Table Converter Tool",
+  "name": "Word Table Converter",
   "short_name": "TConvrter",
   "description": "A tool for converting word table into JSON.",
   "start_url": "TConvrter_2026.html",
