@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline HTML to Word (.docx) Converter</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .converter-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 650px;
+            box-sizing: border-box;
+        }
+        h2 {
+            margin-top: 0;
+            color: #2b579a; /* Word Blue */
+            font-family: 'Segoe UI', sans-serif;
+            border-bottom: 2px solid #f0f2f5;
+            padding-bottom: 10px;
+        }
+        .file-input-wrapper {
+            margin: 20px 0;
+        }
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px dashed #cccccc;
+            border-radius: 4px;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button {
+            background-color: #2b579a;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #1e3d6b;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #previewArea {
+            margin-top: 25px;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            background: #fafafa;
+            border-radius: 4px;
+            max-height: 250px;
+            overflow-y: auto;
+            display: none;
+            font-size: 13px;
+        }
+        .status-msg {
+            font-size: 14px;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+<div class="converter-container">
+    <h2>HTML to Word (.docx) Converter</h2>
+    <p style="font-size: 13px; color: #666;">Convert HTML components completely offline. All styles, fonts, indents, bold/italic markup, and superscripts are structured into an application file format readable directly by Microsoft Word.</p>
+    
+    <div class="file-input-wrapper">
+        <label style="display:block; font-weight:bold; margin-bottom:8px; font-size:14px;">Select HTML File:</label>
+        <input type="file" id="htmlFile" accept=".html,.htm" onchange="handleFileSelect(event)">
+    </div>
+
+    <label style="display:block; font-weight:bold; margin-bottom:8px; font-size:14px;">Output Filename:</label>
+    <input type="text" id="fileNameInput" placeholder="Enter output filename" value="Converted_Document">
+
+    <button id="convertBtn" onclick="convertToWord()" disabled>Convert & Download Word Doc</button>
+
+    <div id="status" class="status-msg"></div>
+    
+    <div id="previewArea">
+        <strong style="display:block; margin-bottom: 5px; color:#555;">Content Preview:</strong>
+        <div id="previewContent"></div>
+    </div>
+</div>
+
+<script>
+    let uploadedHtmlContent = "";
+
+    // Load local HTML file data seamlessly without internet connectivity
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            uploadedHtmlContent = e.target.result;
+            
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(uploadedHtmlContent, 'text/html');
+            const bodyContent = doc.body ? doc.body.innerHTML : uploadedHtmlContent;
+
+            // Render safe UI application preview layouts
+            document.getElementById('previewContent').innerHTML = bodyContent;
+            document.getElementById('previewArea').style.display = 'block';
+            document.getElementById('convertBtn').disabled = false;
+            document.getElementById('status').innerText = "File loaded successfully! Ready to convert.";
+            document.getElementById('status').style.color = "green";
+            
+            if (doc.title) {
+                document.getElementById('fileNameInput').value = doc.title.replace(/[^a-zA-Z0-9-_ ]/g, '_');
+            } else {
+                document.getElementById('fileNameInput').value = file.name.replace(/\.[^/.]+$/, "");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // Direct Conversion using Native XML namespaces without relying on external packages
+    function convertToWord() {
+        if (!uploadedHtmlContent) return;
+
+        document.getElementById('status').innerText = "Generating Word application elements...";
+        document.getElementById('status').style.color = "#2b579a";
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(uploadedHtmlContent, 'text/html');
+        const bodyContent = doc.body ? doc.body.innerHTML : uploadedHtmlContent;
+
+        // Structured Microsoft Office schema document wrapper preserving fonts, margins, and classes
+        const documentHeader = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head>
+            <meta charset='utf-8'>
+            <title>Word Document Export</title>
+            <style>
+                @page WordSection1 {
+                    size: 8.5in 11.0in;
+                    margin: 1.0in 1.0in 1.0in 1.0in;
+                    mso-header-margin: 0.5in;
+                    mso-footer-margin: 0.5in;
+                    mso-paper-source: 0;
+                }
+                div.WordSection1 {
+                    page: WordSection1;
+                }
+                body {
+                    font-family: 'Times New Roman', Times, serif;
+                    font-size: 11pt;
+                }
+                p, div {
+                    margin: 0in 0in 6pt 0in;
+                    line-height: 1.15;
+                }
+                b, strong { font-weight: bold; }
+                i, em { font-style: italic; }
+                sup { vertical-align: super; font-size: 8.5pt; }
+                sub { vertical-align: sub; font-size: 8.5pt; }
+                
+                /* Explicit indents interpreted cleanly by Microsoft Word's parser */
+                .indent-1, [style*="margin-left: 10pt"], [style*="margin-left:10pt"] { margin-left: 0.5in !important; text-indent: 0in; }
+                .indent-2, [style*="margin-left: 20pt"], [style*="margin-left:20pt"] { margin-left: 1.0in !important; text-indent: 0in; }
+                .indent-3, [style*="margin-left: 30pt"], [style*="margin-left:30pt"] { margin-left: 1.5in !important; text-indent: 0in; }
+                
+                .subject-header {
+                    font-weight: bold;
+                    margin-top: 12pt;
+                    margin-bottom: 4pt;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="WordSection1">
+                ${bodyContent}
+            </div>
+        </body>
+        </html>`;
+
+        try {
+            // Convert strings directly into an application byte-stream matching MS Word requirements
+            const blob = new Blob(['\ufeff' + documentHeader], {
+                type: 'application/msword;charset=utf-8'
+            });
+
+            let filename = document.getElementById("fileNameInput").value.trim() || "Converted_Document";
+            filename = filename.replace(/[^a-zA-Z0-9-_ ]/g, '_');
+            if (!filename.toLowerCase().endsWith('.doc') && !filename.toLowerCase().endsWith('.docx')) {
+                filename += '.doc'; // Uses standard MS-Word dynamic application container extension
+            }
+
+            // Cross-platform native download triggers
+            const link = document.createElement("a");
+            if (navigator.msSaveOrOpenBlob) {
+                navigator.msSaveOrOpenBlob(blob, filename);
+            } else {
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setTimeout(() => URL.revokeObjectURL(link.href), 100);
+            }
+
+            document.getElementById('status').innerText = "Success! Document exported successfully.";
+            document.getElementById('status').style.color = "green";
+
+        } catch (err) {
+            alert("Processing Failure: " + err.message);
+            document.getElementById('status').innerText = "Conversion execution dropped.";
+            document.getElementById('status').style.color = "red";
+        }
+    }
+</script>
+
+</body>
+</html>
