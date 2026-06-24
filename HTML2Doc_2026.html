@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML to Word</title>
+    <title>HTML2Doc_07</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -94,8 +94,8 @@
 <body>
 
 <div class="converter-container">
-    <h2>HTML to Word Converter</h2>
-    <p style="font-size: 13px; color: #666;">Convert HTML to Word Document.</p>
+    <h2>HTML to Word 1</h2>
+    <p style="font-size: 13px; color: #666;">Convert HTML components into an actual, native OpenXML Office document container completely offline with indents, underlines, and per-word italics preserved.</p>
     
     <div class="file-input-wrapper">
         <label style="display:block; font-weight:bold; margin-bottom:8px; font-size:14px;">Select HTML File:</label>
@@ -103,7 +103,7 @@
     </div>
 
     <label style="display:block; font-weight:bold; margin-bottom:8px; font-size:14px;">Output Filename:</label>
-    <input type="text" id="fileNameInput" placeholder="Enter output filename" value="Converted_Document">
+    <input type="text" id="fileNameInput" placeholder="Enter output filename" value="DocName">
 
     <button id="convertBtn" onclick="convertToWord()" disabled>Convert & Download True Docx</button>
 
@@ -136,11 +136,11 @@
             document.getElementById('status').innerText = "File loaded successfully! Ready to convert.";
             document.getElementById('status').style.color = "green";
             
-            if (doc.title) {
+/*             if (doc.title) {
                 document.getElementById('fileNameInput').value = doc.title.replace(/[^a-zA-Z0-9-_ ]/g, '_');
             } else {
                 document.getElementById('fileNameInput').value = file.name.replace(/\.[^/.]+$/, "");
-            }
+            } */
         };
         reader.readAsText(file);
     }
@@ -179,13 +179,12 @@
 
                     // --- INDENTATION PARSING LAYER ---
                     let indentValue = 0; // Measured in twips (1440 twips = 1 inch)
-
                     if (el.classList.contains('indent-1') || inlineStyleClean.includes('margin-left:3pt')) {
-                        indentValue = 720;  // 0.5 inches
+                        indentValue = 720;  
                     } else if (el.classList.contains('indent-2') || inlineStyleClean.includes('margin-left:6pt')) {
-                        indentValue = 1440; // 1.0 inch
+                        indentValue = 1440; 
                     } else if (el.classList.contains('indent-3') || inlineStyleClean.includes('margin-left:9pt')) {
-                        indentValue = 2160; // 1.5 inches
+                        indentValue = 2160; 
                     } else if (inlineStyleClean.includes('margin-left:')) {
                         const match = styleAttr.match(/margin-left:\s*([0-9.]+)(pt|px|in|em)/i);
                         if (match) {
@@ -196,13 +195,49 @@
                             else if (unit === 'px') indentValue = Math.round(val * 15);
                         }
                     }
-
                     let indentXml = indentValue > 0 ? `<w:ind w:left="${indentValue}"/>` : '';
+
+                    // --- NEW: LINE SPACING PARSING LAYER ---
+                    let lineSpacingVal = "240";  // Default: Single spacing (240 twips)
+                    let lineRuleVal = "auto";    // Default rule
+
+                    if (inlineStyleClean.includes('line-height:')) {
+                        const lineMatch = styleAttr.match(/line-height:\s*([0-9.]+)(px|pt|em|%)?/i);
+                        if (lineMatch) {
+                            const val = parseFloat(lineMatch[1]);
+                            const unit = lineMatch[2] ? lineMatch[2].toLowerCase() : '';
+
+                            if (!unit) { 
+                                // It's a multiplier (e.g., line-height: 1.5 or 2)
+                                lineSpacingVal = Math.round(val * 240).toString();
+                                lineRuleVal = "auto";
+                            } else if (unit === 'em') {
+                                // em behaves like a multiplier
+                                lineSpacingVal = Math.round(val * 240).toString();
+                                lineRuleVal = "auto";
+                            } else if (unit === '%') {
+                                // Percentage (e.g., 150%)
+                                lineSpacingVal = Math.round((val / 100) * 240).toString();
+                                lineRuleVal = "auto";
+                            } else if (unit === 'pt') {
+                                // Points (1pt = 20 twips)
+                                lineSpacingVal = Math.round(val * 20).toString();
+                                lineRuleVal = "exact";
+                            } else if (unit === 'px') {
+                                // Pixels (approx 1px = 15 twips)
+                                lineSpacingVal = Math.round(val * 15).toString();
+                                lineRuleVal = "exact";
+                            }
+                        }
+                    }
+
+                    // Check for subject-header to apply space before
+                    let spaceBefore = el.classList.contains('subject-header') ? '240' : '0';
 
                     // Start paragraph block
                     documentBodyXml += `<w:p>
                         <w:pPr>
-                            <w:spacing w:after="120" w:line="276" w:lineRule="auto"/>
+                            <w:spacing w:before="${spaceBefore}" w:after="20" w:line="${lineSpacingVal}" w:lineRule="${lineRuleVal}"/>
                             ${indentXml}
                             <w:rPr>
                                 <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
