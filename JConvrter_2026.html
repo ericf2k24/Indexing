@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>JConvrter_03</title>
     <link rel="manifest" href="manifestjc.json">
 
     <script>
       /* how to 
+      
       
       -this will downoad an html file
       -upload file to gdrive or open with google docs or microsoft word
@@ -354,10 +356,11 @@
         const content = document.getElementById('output').innerHTML.replaceAll("</div>", "</div>\n");
         
         // Construct standard HTML document with formatting styles preserved
+        // .subject-header { font-weight: bold; text-transform: none; margin-top: 20pt; }\n` >>> sets NAME space before
         const header = `<!DOCTYPE html>\n<html lang="en">\n` +
             `<head>\n<meta charset='utf-8'>\n<title>Sorted Document</title>\n<style>\n` +
             `body { font-family: 'Times New Roman', serif; font-size: 11pt; padding: 20px; }\n` +
-            `.subject-header { font-weight: bold; text-transform: none; margin-top: 10pt; }\n` +
+            `.subject-header { font-weight: bold; text-transform: none; margin-top: 20pt; }\n` +
             `div { line-height: 1.2; margin-bottom: 2pt; }\n` +
             `</style>\n</head>\n<body>\n`;
         const footer = `\n</body>\n</html>`;
@@ -424,22 +427,22 @@
     <h3>Combine Multiple Files</h3>    
     <div class="merger-grid">
         <div class="merger-box">
-          <label>Index 1 (Black)</label>
+          <label>Index A (Black)</label>
           <input type="file" id="fileA" accept=".json" onchange="loadFile(event,'jsonA')" />
           <textarea id="jsonA" style="display:none;"></textarea>
         </div>
         <div class="merger-box">
-          <label>Index 2 (Black)</label>
+          <label>Index B (Black)</label>
           <input type="file" id="fileB" accept=".json" onchange="loadFile(event,'jsonB')" />
           <textarea id="jsonB" style="display:none;"></textarea>
         </div>
         <div class="merger-box">
-          <label>Index 3 (Red Letter)</label>
+          <label>Index C (Red Letter)</label>
           <input type="file" id="fileC" accept=".json" onchange="loadFile(event,'jsonC')" />
           <textarea id="jsonC" style="display:none;"></textarea>
         </div>      
     </div>
-    <button class="btn-combine" onclick="combineJsons()">Combine</button>
+    <button class="btn-combine" onclick="combineJsons()">Combine Files</button>
     <button class="btn-clear" onclick="clearAll()">Clear All</button>
     <h3>Combined and Sorted</h3>
     <textarea id="jsonInput" placeholder="Combined Files will appear here..."></textarea>
@@ -449,7 +452,7 @@
         <button class="btn-json post-process-btn" style="display:none;" onclick="saveJsonOutput()">Save JSON</button>
         <br>
         <input type="text" id="fileNameInput2" placeholder="Enter filename..." value="Sorted_J201_00_00" style="display:none; padding: 8px; border-radius: 4px; border: 1px solid #ccc; height: 6px; width: 110px; margin-left: 0px; margin-right: 2px; vertical-align: middle">
-        <button id="dlBtn" class="btn-secondary post-process-btn" style="display:none;" onclick="downloadDoc()">Download .html</button>
+        <button id="dlBtn" class="btn-secondary post-process-btn" style="display:none;" onclick="downloadDoc()">Download .docx</button>
         
         <button class="btn-json post-process-btn" style="display:none;" onclick="copyJsonOutput()">Copy Doc Contents</button>
     </div>
