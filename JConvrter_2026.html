@@ -5,6 +5,14 @@
     <link rel="manifest" href="manifestjc.json">
 
     <script>
+      /* how to 
+      
+      
+      -this will downoad an html file
+      -upload file to gdrive or open with google docs or microsoft word
+      -need to save file as .docx
+      
+      */
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('swjc.js')
@@ -13,6 +21,8 @@
         });
       }
     </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.3.1/html-docx.js"></script>
 
     <style>
         body { font-family: 'Times New Roman', Times, serif; padding: 5px; background-color: #f0f2f5; }
@@ -60,7 +70,6 @@
           display: none; 
           line-height: 1.2; 
           font-size: 11pt;
-          /* New styles to limit height */
           height: 700px; 
           resize: vertical;
           overflow-y: auto; 
@@ -72,11 +81,10 @@
         ['jsonA', 'jsonB', 'jsonC', 'jsonInput'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('output').innerHTML = '';
         document.getElementById('output').style.display = 'none';
-        document.getElementById('fileA').value = ''; // clear chosen file
-        document.getElementById('fileB').value = ''; // clear chosen file
-        document.getElementById('fileC').value = ''; // clear chosen file
+        document.getElementById('fileA').value = ''; 
+        document.getElementById('fileB').value = ''; 
+        document.getElementById('fileC').value = ''; 
         document.querySelectorAll('.post-process-btn').forEach(btn => btn.style.display = 'none');
-        // Clear and hide the inputs and code container
         document.getElementById('fileNameInput1').style.display = 'none';
         document.getElementById('fileNameInput2').style.display = 'none';
         const rawCode = document.getElementById('rawCodeOutput');
@@ -125,11 +133,11 @@
           ];
           const clean = (val) => {
             return String(val || "")
-              .replace(/<[^>]*>/g, "")   // remove HTML tags for comparison only
+              .replace(/<[^>]*>/g, "")   
               .toLowerCase()
-              .replace(/,/g, " zz") // treat comma as a separator and ensure the part after comma is sorted as if it starts with "zzz"
-              .replace(/-/g, ", zz ") // treat hyphen as a separator and ensure the part after hyphen is sorted as if it starts with "zzz"
-              .replace(/ñ/g, "nzz") // for sorting purposes, treat ñ as zzz to ensure it comes after n
+              .replace(/,/g, " zz") 
+              .replace(/-/g, ", zz ") 
+              .replace(/ñ/g, "nzz") 
               .trim();
           };
           combinedArray.sort((a,b) => {
@@ -337,55 +345,62 @@
         const fullCode = docHeader + rawContent + "\n</body>\n</html>";
         document.getElementById('rawCodeOutput').value = fullCode;
         document.getElementById('codeOutputContainer').style.display = 'block';
-        // Show Hidden Inputs and Buttons
+        
         document.getElementById('fileNameInput1').style.display = 'inline-block';
         document.getElementById('fileNameInput2').style.display = 'inline-block';
         document.querySelectorAll('.post-process-btn').forEach(btn => btn.style.display = 'inline-block');
-    }
+      }
 
+      function downloadDoc() {
+        const content = document.getElementById('output').innerHTML.replaceAll("</div>", "</div>\n");
         
-function downloadDoc() {
-    const content = document.getElementById('output').innerHTML.replaceAll("</div>", "</div>\n");
-    const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:office:word' xmlns='http://www.w3.org/TR/REC-html40'>\n` +
-        `<head>\n<meta charset='utf-8'>\n<style>\n` +
-        `body { font-family: 'Times New Roman', serif; font-size: 11pt; }\n` +
-        `.subject-header { font-weight: bold; text-transform: none; margin-top: 10pt; }\n` +
-        `div { line-height: 1.2; margin-bottom: 2pt; }\n` +
-        `</style>\n</head>\n<body>\n`;
-    const footer = `\n</body>\n</html>`;
-    const fullHtml = header + content + footer;
-    
-    let filename = document.getElementById("fileNameInput2").value || "Sorted_Document";
-    if (!filename.endsWith('.doc')) {
-        filename += '.doc';
-    }
+        // Construct standard HTML document with formatting styles preserved
+        const header = `<!DOCTYPE html>\n<html lang="en">\n` +
+            `<head>\n<meta charset='utf-8'>\n<title>Sorted Document</title>\n<style>\n` +
+            `body { font-family: 'Times New Roman', serif; font-size: 11pt; padding: 20px; }\n` +
+            `.subject-header { font-weight: bold; text-transform: none; margin-top: 10pt; }\n` +
+            `div { line-height: 1.2; margin-bottom: 2pt; }\n` +
+            `</style>\n</head>\n<body>\n`;
+        const footer = `\n</body>\n</html>`;
+        const fullHtml = header + content + footer;
+        
+        let filename = document.getElementById("fileNameInput2").value || "Sorted_Document";
+        
+        // Strip old extensions if present, then force .html
+        if (filename.endsWith('.doc')) filename = filename.slice(0, -4);
+        if (filename.endsWith('.docx')) filename = filename.slice(0, -5);
+        if (!filename.endsWith('.html')) {
+            filename += '.html';
+        }
 
-    // Check if device is iOS (iPhone/iPad)
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        // Check if device is iOS (iPhone/iPad)
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-    if (isIOS) {
-        // iOS Fix: Read as Base64 and trigger download via location routing
-        const blob = new Blob(['\ufeff', fullHtml], { type: 'application/octet-stream' });
-        const reader = new FileReader();
-        reader.onloadend = function () {
-            const link = document.createElement('a');
-            link.href = reader.result;
+        if (isIOS) {
+            // iOS Download Flow (MIME type adjusted to text/html)
+            const blob = new Blob(['\ufeff', fullHtml], { type: 'text/html;charset=utf-8' });
+            const reader = new FileReader();
+            reader.onloadend = function () {
+                const link = document.createElement('a');
+                link.href = reader.result;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+            reader.readAsDataURL(blob);
+        } else {
+            // Standard Desktop Download Flow (MIME type adjusted to text/html)
+            const blob = new Blob(['\ufeff', fullHtml], { type: 'text/html;charset=utf-8' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
             link.download = filename;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        };
-        reader.readAsDataURL(blob);
-    } else {
-        // Standard Desktop Download
-        const blob = new Blob(['\ufeff', fullHtml], { type: 'application/msword' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
-        setTimeout(() => URL.revokeObjectURL(link.href), 100);
+            setTimeout(() => URL.revokeObjectURL(link.href), 100);
+        }
     }
-}
 
       function loadFile(event, targetId) {
           const file = event.target.files[0];
@@ -435,7 +450,8 @@ function downloadDoc() {
         <button class="btn-json post-process-btn" style="display:none;" onclick="saveJsonOutput()">Save JSON</button>
         <br>
         <input type="text" id="fileNameInput2" placeholder="Enter filename..." value="Sorted_J201_00_00" style="display:none; padding: 8px; border-radius: 4px; border: 1px solid #ccc; height: 6px; width: 110px; margin-left: 0px; margin-right: 2px; vertical-align: middle">
-        <button id="dlBtn" class="btn-secondary post-process-btn" style="display:none;" onclick="downloadDoc()">Download .doc</button>
+        <button id="dlBtn" class="btn-secondary post-process-btn" style="display:none;" onclick="downloadDoc()">Download .docx</button>
+        
         <button class="btn-json post-process-btn" style="display:none;" onclick="copyJsonOutput()">Copy Doc Contents</button>
     </div>
     <div id="codeOutputContainer" style="margin-top: 20px; display: none;">
@@ -445,5 +461,4 @@ function downloadDoc() {
     <div id="output"></div>       
 </div>
 </body>
-
 </html>
