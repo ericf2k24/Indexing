@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>100% Offline True Word (.docx) Converter</title>
+    <title>HTML to Word</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -152,7 +152,7 @@
         const status = document.getElementById('status');
         
         btn.disabled = true;
-        status.innerText = "Assembling genuine OpenXML binary structure with indents...";
+        status.innerText = "Assembling genuine OpenXML binary structure...";
         status.style.color = "#2b579a";
 
         try {
@@ -167,38 +167,39 @@
                 documentBodyXml += `<w:p><w:r><w:t>${escapeXml(cleanText)}</w:t></w:r></w:p>`;
             } else {
                 elements.forEach(el => {
-                    const text = el.innerText.trim();
-                    if (!text) return;
+                    const blockText = el.innerText.trim();
+                    if (!blockText) return;
+
+                    const styleAttr = el.getAttribute('style') || '';
+                    const inlineStyleClean = styleAttr.replace(/\s+/g, '').toLowerCase();
 
                     let isBold = el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' || !!el.querySelector('b, strong');
-                    let isItalic = !!el.querySelector('i, em');
+                    let isUnderline = !!el.querySelector('u, ins') || inlineStyleClean.includes('text-decoration:underline');
                     let size = el.tagName === 'H1' ? '32' : el.tagName === 'H2' ? '28' : '22'; // 16pt, 14pt, 11pt
 
                     // --- INDENTATION PARSING LAYER ---
                     let indentValue = 0; // Measured in twips (1440 twips = 1 inch)
-                    const styleAttr = el.getAttribute('style') || '';
 
-                    if (el.classList.contains('indent-1') || styleAttr.replace(/\s+/g, '').includes('margin-left:3pt')) {
+                    if (el.classList.contains('indent-1') || inlineStyleClean.includes('margin-left:3pt')) {
                         indentValue = 720;  // 0.5 inches
-                    } else if (el.classList.contains('indent-2') || styleAttr.replace(/\s+/g, '').includes('margin-left:6pt')) {
+                    } else if (el.classList.contains('indent-2') || inlineStyleClean.includes('margin-left:6pt')) {
                         indentValue = 1440; // 1.0 inch
-                    } else if (el.classList.contains('indent-3') || styleAttr.replace(/\s+/g, '').includes('margin-left:9pt')) {
+                    } else if (el.classList.contains('indent-3') || inlineStyleClean.includes('margin-left:9pt')) {
                         indentValue = 2160; // 1.5 inches
-                    } else if (styleAttr.includes('margin-left:')) {
-                        // Dynamic backup parser for numeric margin-left strings
-                        const match = styleAttr.match(/margin-left:\s*([0-9.]+)(pt|px|in|em)/);
+                    } else if (inlineStyleClean.includes('margin-left:')) {
+                        const match = styleAttr.match(/margin-left:\s*([0-9.]+)(pt|px|in|em)/i);
                         if (match) {
                             const val = parseFloat(match[1]);
-                            const unit = match[2];
+                            const unit = match[2].toLowerCase();
                             if (unit === 'in') indentValue = Math.round(val * 1440);
                             else if (unit === 'pt') indentValue = Math.round(val * 20);
                             else if (unit === 'px') indentValue = Math.round(val * 15);
                         }
                     }
 
-                    // Generate native Word indentation XML block if an indent was tracked
                     let indentXml = indentValue > 0 ? `<w:ind w:left="${indentValue}"/>` : '';
 
+                    // Start paragraph block
                     documentBodyXml += `<w:p>
                         <w:pPr>
                             <w:spacing w:after="120" w:line="276" w:lineRule="auto"/>
@@ -207,17 +208,49 @@
                                 <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
                                 <w:sz w:val="${size}"/>
                             </w:rPr>
-                        </w:pPr>
-                        <w:r>
-                            <w:rPr>
-                                <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
-                                ${isBold ? '<w:b/>' : ''}
-                                ${isItalic ? '<w:i/>' : ''}
-                                <w:sz w:val="${size}"/>
-                            </w:rPr>
-                            <w:t>${escapeXml(text)}</w:t>
-                        </w:r>
-                    </w:p>`;
+                        </w:pPr>`;
+
+                    // --- PER-WORD PROCESSING LAYER ---
+                    // Helper logic using DOM traversal to isolate words and catch wrapping italic tags
+                    const childNodes = Array.from(el.childNodes);
+                    
+                    childNodes.forEach(node => {
+                        let nodeText = node.textContent;
+                        if (!nodeText) return;
+
+                        // Check if this specific node snippet is wrapped inside/is an italic container
+                        let nodeIsItalic = false;
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            nodeIsItalic = node.tagName === 'I' || node.tagName === 'EM' || (node.getAttribute('style') || '').toLowerCase().includes('font-style:italic');
+                        } else if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
+                            let parent = node.parentNode;
+                            nodeIsItalic = parent.tagName === 'I' || parent.tagName === 'EM' || (parent.getAttribute('style') || '').toLowerCase().includes('font-style:italic');
+                        }
+
+                        // Split by spaces but preserve them as separate tokens so formatting bounds map tightly to words
+                        const tokens = nodeText.split(/(\s+)/);
+
+                        tokens.forEach(token => {
+                            if (!token) return;
+                            
+                            // If the token consists purely of whitespace, don't flag it as italicized/styled run content 
+                            let isWhitespace = /^\s+$/.test(token);
+                            let useItalic = !isWhitespace && nodeIsItalic;
+
+                            documentBodyXml += `<w:r>
+                                <w:rPr>
+                                    <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+                                    ${isBold ? '<w:b/>' : ''}
+                                    ${useItalic ? '<w:i/>' : ''}
+                                    ${isUnderline ? '<w:u w:val="single"/>' : ''}
+                                    <w:sz w:val="${size}"/>
+                                </w:rPr>
+                                <w:t xml:space="preserve">${escapeXml(token)}</w:t>
+                            </w:r>`;
+                        });
+                    });
+
+                    documentBodyXml += `</w:p>`;
                 });
             }
 
