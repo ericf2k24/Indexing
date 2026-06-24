@@ -3,26 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML2Doc_07</title>
-    <link rel="manifest" href="manifesthd.json">
-
-    <script>
-      /* how to 
-      
-      
-      -this will downoad an html file
-      -upload file to gdrive or open with google docs or microsoft word
-      -need to save file as .docx
-      
-      */
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('swhd.js')
-            .then(reg => console.log('Service Worker registered!'))
-            .catch(err => console.error('Service Worker registration failed:', err));
-        });
-      }
-    </script>
+    <title>HTML2Doc_09 - Enhanced Layout Engine</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -113,8 +94,8 @@
 <body>
 
 <div class="converter-container">
-    <h2>HTML to Word 7</h2>
-    <p style="font-size: 13px; color: #666;">Convert HTML to Word.</p>
+    <h2>HTML to Word 9</h2>
+    <p style="font-size: 13px; color: #666;">Convert HTML components into an actual, native OpenXML Office document container completely offline with indents, linespacing, font colors, underlines, and per-word italics preserved.</p>
     
     <div class="file-input-wrapper">
         <label style="display:block; font-weight:bold; margin-bottom:8px; font-size:14px;">Select HTML File:</label>
@@ -154,14 +135,30 @@
             document.getElementById('convertBtn').disabled = false;
             document.getElementById('status').innerText = "File loaded successfully! Ready to convert.";
             document.getElementById('status').style.color = "green";
-            
-/*             if (doc.title) {
-                document.getElementById('fileNameInput').value = doc.title.replace(/[^a-zA-Z0-9-_ ]/g, '_');
-            } else {
-                document.getElementById('fileNameInput').value = file.name.replace(/\.[^/.]+$/, "");
-            } */
         };
         reader.readAsText(file);
+    }
+
+    // Helper to translate CSS color definitions down to a strict 6-character OpenXML Hex
+    function parseColorToHex(colorStr) {
+        if (!colorStr) return null;
+        const cleanColor = colorStr.trim().toLowerCase();
+        
+        if (cleanColor.startsWith('#')) {
+            let hex = cleanColor.substring(1);
+            if (hex.length === 3) {
+                return hex.split('').map(c => c + c).join('');
+            }
+            return hex.substring(0, 6);
+        }
+        
+        const colorMap = {
+            'red': 'FF0000', 'blue': '0000FF', 'green': '008000', 
+            'black': '000000', 'white': 'FFFFFF', 'gray': '808080', 
+            'grey': '808080', 'yellow': 'FFFF00', 'orange': 'FFA500',
+            'purple': '800080', 'charcoal': '36454F'
+        };
+        return colorMap[cleanColor] || null;
     }
 
     async function convertToWord() {
@@ -198,12 +195,13 @@
 
                     // --- INDENTATION PARSING LAYER ---
                     let indentValue = 0; // Measured in twips (1440 twips = 1 inch)
+
                     if (el.classList.contains('indent-1') || inlineStyleClean.includes('margin-left:3pt')) {
-                        indentValue = 720;  
+                        indentValue = 720;  // 0.5 inches
                     } else if (el.classList.contains('indent-2') || inlineStyleClean.includes('margin-left:6pt')) {
-                        indentValue = 1440; 
+                        indentValue = 1440; // 1.0 inch
                     } else if (el.classList.contains('indent-3') || inlineStyleClean.includes('margin-left:9pt')) {
-                        indentValue = 2160; 
+                        indentValue = 2160; // 1.5 inches
                     } else if (inlineStyleClean.includes('margin-left:')) {
                         const match = styleAttr.match(/margin-left:\s*([0-9.]+)(pt|px|in|em)/i);
                         if (match) {
@@ -214,7 +212,11 @@
                             else if (unit === 'px') indentValue = Math.round(val * 15);
                         }
                     }
+
                     let indentXml = indentValue > 0 ? `<w:ind w:left="${indentValue}"/>` : '';
+
+                    // --- NEW: SPACE BEFORE LAYER ---
+                    let spaceBefore = el.classList.contains('subject-header') ? '240' : '0';
 
                     // --- NEW: LINE SPACING PARSING LAYER ---
                     let lineSpacingVal = "240";  // Default: Single spacing (240 twips)
@@ -226,32 +228,28 @@
                             const val = parseFloat(lineMatch[1]);
                             const unit = lineMatch[2] ? lineMatch[2].toLowerCase() : '';
 
-                            if (!unit) { 
-                                // It's a multiplier (e.g., line-height: 1.5 or 2)
-                                lineSpacingVal = Math.round(val * 240).toString();
-                                lineRuleVal = "auto";
-                            } else if (unit === 'em') {
-                                // em behaves like a multiplier
+                            if (!unit || unit === 'em') { 
                                 lineSpacingVal = Math.round(val * 240).toString();
                                 lineRuleVal = "auto";
                             } else if (unit === '%') {
-                                // Percentage (e.g., 150%)
                                 lineSpacingVal = Math.round((val / 100) * 240).toString();
                                 lineRuleVal = "auto";
                             } else if (unit === 'pt') {
-                                // Points (1pt = 20 twips)
                                 lineSpacingVal = Math.round(val * 20).toString();
                                 lineRuleVal = "exact";
                             } else if (unit === 'px') {
-                                // Pixels (approx 1px = 15 twips)
                                 lineSpacingVal = Math.round(val * 15).toString();
                                 lineRuleVal = "exact";
                             }
                         }
                     }
 
-                    // Check for subject-header to apply space before
-                    let spaceBefore = el.classList.contains('subject-header') ? '240' : '0';
+                    // --- NEW: BASE ELEMENT COLOR PARSING ---
+                    let elementColorHex = null;
+                    if (inlineStyleClean.includes('color:')) {
+                        const colorMatch = styleAttr.match(/color:\s*([^;]+)/i);
+                        if (colorMatch) elementColorHex = parseColorToHex(colorMatch[1]);
+                    }
 
                     // Start paragraph block
                     documentBodyXml += `<w:p>
@@ -261,33 +259,46 @@
                             <w:rPr>
                                 <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
                                 <w:sz w:val="${size}"/>
+                                ${elementColorHex ? `<w:color w:val="${elementColorHex}"/>` : ''}
                             </w:rPr>
                         </w:pPr>`;
 
                     // --- PER-WORD PROCESSING LAYER ---
-                    // Helper logic using DOM traversal to isolate words and catch wrapping italic tags
                     const childNodes = Array.from(el.childNodes);
                     
                     childNodes.forEach(node => {
                         let nodeText = node.textContent;
                         if (!nodeText) return;
 
-                        // Check if this specific node snippet is wrapped inside/is an italic container
                         let nodeIsItalic = false;
+                        let inlineColorHex = null;
+
                         if (node.nodeType === Node.ELEMENT_NODE) {
-                            nodeIsItalic = node.tagName === 'I' || node.tagName === 'EM' || (node.getAttribute('style') || '').toLowerCase().includes('font-style:italic');
+                            const nodeStyle = (node.getAttribute('style') || '').toLowerCase().replace(/\s+/g, '');
+                            nodeIsItalic = node.tagName === 'I' || node.tagName === 'EM' || nodeStyle.includes('font-style:italic');
+                            
+                            const colorMatch = node.getAttribute('style')?.match(/color:\s*([^;]+)/i);
+                            if (colorMatch) inlineColorHex = parseColorToHex(colorMatch[1]);
+
                         } else if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
                             let parent = node.parentNode;
-                            nodeIsItalic = parent.tagName === 'I' || parent.tagName === 'EM' || (parent.getAttribute('style') || '').toLowerCase().includes('font-style:italic');
+                            const parentStyle = (parent.getAttribute('style') || '').toLowerCase().replace(/\s+/g, '');
+                            nodeIsItalic = parent.tagName === 'I' || parent.tagName === 'EM' || parentStyle.includes('font-style:italic');
+                            
+                            if (parent !== el) {
+                                const colorMatch = parent.getAttribute('style')?.match(/color:\s*([^;]+)/i);
+                                if (colorMatch) inlineColorHex = parseColorToHex(colorMatch[1]);
+                            }
                         }
 
-                        // Split by spaces but preserve them as separate tokens so formatting bounds map tightly to words
+                        let activeColorHex = inlineColorHex || elementColorHex;
+                        let colorXml = activeColorHex ? `<w:color w:val="${activeColorHex}"/>` : '';
+
                         const tokens = nodeText.split(/(\s+)/);
 
                         tokens.forEach(token => {
                             if (!token) return;
                             
-                            // If the token consists purely of whitespace, don't flag it as italicized/styled run content 
                             let isWhitespace = /^\s+$/.test(token);
                             let useItalic = !isWhitespace && nodeIsItalic;
 
@@ -298,6 +309,7 @@
                                     ${useItalic ? '<w:i/>' : ''}
                                     ${isUnderline ? '<w:u w:val="single"/>' : ''}
                                     <w:sz w:val="${size}"/>
+                                    ${colorXml}
                                 </w:rPr>
                                 <w:t xml:space="preserve">${escapeXml(token)}</w:t>
                             </w:r>`;
