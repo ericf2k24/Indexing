@@ -18,7 +18,7 @@
         });
       }
     </script>
-    <title>TC01</title>
+    <title>TC02</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
     <style>
         body { font-family: 'Times New Roman', Times, serif; padding: 10px; background-color: #f8f9fa; }
@@ -136,24 +136,30 @@
     }
 
     function saveFile(data, filename) {
-        // 1. Force the type to application/octet-stream so iOS treats it as a generic binary file download rather than a displayable JSON text string
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/octet-stream" });
+        // 1. Convert the data to a raw string first
+        let jsonString = JSON.stringify(data, null, 2);
+    
+        // 2. Forcefully replace ALL strong/em variations right before making the file
+        jsonString = jsonString.replace(/<strong>/gi, '').replace(/<\/strong>/gi, '');
+        jsonString = jsonString.replace(/<em>/gi, '<i>').replace(/<\/em>/gi, '</i>');
+    
+        // 3. Create the blob from our freshly cleaned string
+        const blob = new Blob([jsonString], { type: "application/octet-stream" });
         const url = URL.createObjectURL(blob);
         
         const link = document.createElement("a");
         link.href = url;
         link.download = filename;
         
-        // 2. iOS 26 Safari strictly ignores clicks on elements floating in-memory. It must exist on the page body.
         document.body.appendChild(link);
         link.click();
         
-        // 3. Clean up the DOM element and delay the URL revocation to give iOS space to process the filesystem save
         document.body.removeChild(link);
         setTimeout(() => {
             URL.revokeObjectURL(url);
         }, 200);
     }
+    
 </script>
 
 </body>
