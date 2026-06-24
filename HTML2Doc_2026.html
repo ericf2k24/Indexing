@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Offline HTML to Word (.docx) Converter</title>
+    <title>100% Offline True Word (.docx) Converter</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -94,8 +94,8 @@
 <body>
 
 <div class="converter-container">
-    <h2>HTML to Word (.docx) Converter</h2>
-    <p style="font-size: 13px; color: #666;">Convert HTML components completely offline. All styles, fonts, indents, bold/italic markup, and superscripts are structured into an application file format readable directly by Microsoft Word.</p>
+    <h2>HTML to True Word (.docx) Converter</h2>
+    <p style="font-size: 13px; color: #666;">Convert HTML components into an actual, native OpenXML Office document container completely offline with indents preserved.</p>
     
     <div class="file-input-wrapper">
         <label style="display:block; font-weight:bold; margin-bottom:8px; font-size:14px;">Select HTML File:</label>
@@ -105,7 +105,7 @@
     <label style="display:block; font-weight:bold; margin-bottom:8px; font-size:14px;">Output Filename:</label>
     <input type="text" id="fileNameInput" placeholder="Enter output filename" value="Converted_Document">
 
-    <button id="convertBtn" onclick="convertToWord()" disabled>Convert & Download Word Doc</button>
+    <button id="convertBtn" onclick="convertToWord()" disabled>Convert & Download True Docx</button>
 
     <div id="status" class="status-msg"></div>
     
@@ -118,7 +118,6 @@
 <script>
     let uploadedHtmlContent = "";
 
-    // Load local HTML file data seamlessly without internet connectivity
     function handleFileSelect(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -131,7 +130,6 @@
             const doc = parser.parseFromString(uploadedHtmlContent, 'text/html');
             const bodyContent = doc.body ? doc.body.innerHTML : uploadedHtmlContent;
 
-            // Render safe UI application preview layouts
             document.getElementById('previewContent').innerHTML = bodyContent;
             document.getElementById('previewArea').style.display = 'block';
             document.getElementById('convertBtn').disabled = false;
@@ -147,98 +145,220 @@
         reader.readAsText(file);
     }
 
-    // Direct Conversion using Native XML namespaces without relying on external packages
-    function convertToWord() {
+    async function convertToWord() {
         if (!uploadedHtmlContent) return;
 
-        document.getElementById('status').innerText = "Generating Word application elements...";
-        document.getElementById('status').style.color = "#2b579a";
-
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(uploadedHtmlContent, 'text/html');
-        const bodyContent = doc.body ? doc.body.innerHTML : uploadedHtmlContent;
-
-        // Structured Microsoft Office schema document wrapper preserving fonts, margins, and classes
-        const documentHeader = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-        <head>
-            <meta charset='utf-8'>
-            <title>Word Document Export</title>
-            <style>
-                @page WordSection1 {
-                    size: 8.5in 11.0in;
-                    margin: 1.0in 1.0in 1.0in 1.0in;
-                    mso-header-margin: 0.5in;
-                    mso-footer-margin: 0.5in;
-                    mso-paper-source: 0;
-                }
-                div.WordSection1 {
-                    page: WordSection1;
-                }
-                body {
-                    font-family: 'Times New Roman', Times, serif;
-                    font-size: 11pt;
-                }
-                p, div {
-                    margin: 0in 0in 6pt 0in;
-                    line-height: 1.15;
-                }
-                b, strong { font-weight: bold; }
-                i, em { font-style: italic; }
-                sup { vertical-align: super; font-size: 8.5pt; }
-                sub { vertical-align: sub; font-size: 8.5pt; }
-                
-                /* Explicit indents interpreted cleanly by Microsoft Word's parser */
-                .indent-1, [style*="margin-left: 10pt"], [style*="margin-left:10pt"] { margin-left: 0.5in !important; text-indent: 0in; }
-                .indent-2, [style*="margin-left: 20pt"], [style*="margin-left:20pt"] { margin-left: 1.0in !important; text-indent: 0in; }
-                .indent-3, [style*="margin-left: 30pt"], [style*="margin-left:30pt"] { margin-left: 1.5in !important; text-indent: 0in; }
-                
-                .subject-header {
-                    font-weight: bold;
-                    margin-top: 12pt;
-                    margin-bottom: 4pt;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="WordSection1">
-                ${bodyContent}
-            </div>
-        </body>
-        </html>`;
+        const btn = document.getElementById('convertBtn');
+        const status = document.getElementById('status');
+        
+        btn.disabled = true;
+        status.innerText = "Assembling genuine OpenXML binary structure with indents...";
+        status.style.color = "#2b579a";
 
         try {
-            // Convert strings directly into an application byte-stream matching MS Word requirements
-            const blob = new Blob(['\ufeff' + documentHeader], {
-                type: 'application/msword;charset=utf-8'
-            });
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(uploadedHtmlContent, 'text/html');
+            
+            const elements = Array.from(doc.querySelectorAll('p, h1, h2, h3, div, li'));
+            let documentBodyXml = "";
+
+            if (elements.length === 0) {
+                const cleanText = doc.body ? doc.body.innerText : uploadedHtmlContent;
+                documentBodyXml += `<w:p><w:r><w:t>${escapeXml(cleanText)}</w:t></w:r></w:p>`;
+            } else {
+                elements.forEach(el => {
+                    const text = el.innerText.trim();
+                    if (!text) return;
+
+                    let isBold = el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' || !!el.querySelector('b, strong');
+                    let isItalic = !!el.querySelector('i, em');
+                    let size = el.tagName === 'H1' ? '32' : el.tagName === 'H2' ? '28' : '22'; // 16pt, 14pt, 11pt
+
+                    // --- INDENTATION PARSING LAYER ---
+                    let indentValue = 0; // Measured in twips (1440 twips = 1 inch)
+                    const styleAttr = el.getAttribute('style') || '';
+
+                    if (el.classList.contains('indent-1') || styleAttr.replace(/\s+/g, '').includes('margin-left:3pt')) {
+                        indentValue = 720;  // 0.5 inches
+                    } else if (el.classList.contains('indent-2') || styleAttr.replace(/\s+/g, '').includes('margin-left:6pt')) {
+                        indentValue = 1440; // 1.0 inch
+                    } else if (el.classList.contains('indent-3') || styleAttr.replace(/\s+/g, '').includes('margin-left:9pt')) {
+                        indentValue = 2160; // 1.5 inches
+                    } else if (styleAttr.includes('margin-left:')) {
+                        // Dynamic backup parser for numeric margin-left strings
+                        const match = styleAttr.match(/margin-left:\s*([0-9.]+)(pt|px|in|em)/);
+                        if (match) {
+                            const val = parseFloat(match[1]);
+                            const unit = match[2];
+                            if (unit === 'in') indentValue = Math.round(val * 1440);
+                            else if (unit === 'pt') indentValue = Math.round(val * 20);
+                            else if (unit === 'px') indentValue = Math.round(val * 15);
+                        }
+                    }
+
+                    // Generate native Word indentation XML block if an indent was tracked
+                    let indentXml = indentValue > 0 ? `<w:ind w:left="${indentValue}"/>` : '';
+
+                    documentBodyXml += `<w:p>
+                        <w:pPr>
+                            <w:spacing w:after="120" w:line="276" w:lineRule="auto"/>
+                            ${indentXml}
+                            <w:rPr>
+                                <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+                                <w:sz w:val="${size}"/>
+                            </w:rPr>
+                        </w:pPr>
+                        <w:r>
+                            <w:rPr>
+                                <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+                                ${isBold ? '<w:b/>' : ''}
+                                ${isItalic ? '<w:i/>' : ''}
+                                <w:sz w:val="${size}"/>
+                            </w:rPr>
+                            <w:t>${escapeXml(text)}</w:t>
+                        </w:r>
+                    </w:p>`;
+                });
+            }
+
+            const contentTypesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`;
+            const relsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`;
+            const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${documentBodyXml}<w:sectPr><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/></w:sectPr></w:body></w:document>`;
+
+            const packer = new SimpleZipPacker();
+            packer.addFile("[Content_Types].xml", contentTypesXml);
+            packer.addFile("_rels/.rels", relsXml);
+            packer.addFile("word/document.xml", documentXml);
+
+            const blob = packer.generateBlob();
 
             let filename = document.getElementById("fileNameInput").value.trim() || "Converted_Document";
             filename = filename.replace(/[^a-zA-Z0-9-_ ]/g, '_');
-            if (!filename.toLowerCase().endsWith('.doc') && !filename.toLowerCase().endsWith('.docx')) {
-                filename += '.doc'; // Uses standard MS-Word dynamic application container extension
+            if (!filename.toLowerCase().endsWith('.docx')) {
+                filename += '.docx';
             }
 
-            // Cross-platform native download triggers
             const link = document.createElement("a");
-            if (navigator.msSaveOrOpenBlob) {
-                navigator.msSaveOrOpenBlob(blob, filename);
-            } else {
-                link.href = URL.createObjectURL(blob);
-                link.download = filename;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                setTimeout(() => URL.revokeObjectURL(link.href), 100);
-            }
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(link.href), 100);
 
-            document.getElementById('status').innerText = "Success! Document exported successfully.";
-            document.getElementById('status').style.color = "green";
+            status.innerText = "Success! Genuine .docx document exported completely offline.";
+            status.style.color = "green";
 
         } catch (err) {
             alert("Processing Failure: " + err.message);
-            document.getElementById('status').innerText = "Conversion execution dropped.";
-            document.getElementById('status').style.color = "red";
+            status.innerText = "Conversion execution failed.";
+            status.style.color = "red";
+        } finally {
+            btn.disabled = false;
         }
+    }
+
+    function escapeXml(unsafe) {
+        return unsafe.replace(/[<>&'"]/g, function (c) {
+            switch (c) {
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '&': return '&amp;';
+                case '\'': return '&apos;';
+                case '"': return '&quot;';
+            }
+        });
+    }
+
+    function SimpleZipPacker() {
+        this.files = [];
+        this.addFile = function(name, content) {
+            const encoder = new TextEncoder();
+            const uint8Data = encoder.encode(content);
+            this.files.push({ name: name, data: uint8Data });
+        };
+        this.generateBlob = function() {
+            let bufferParts = [];
+            let centralDirectoryParts = [];
+            let currentOffset = 0;
+            const crc32Table = [];
+            for (let i = 0; i < 256; i++) {
+                let c = i;
+                for (let j = 0; j < 8; j++) {
+                    c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+                }
+                crc32Table[i] = c;
+            }
+            function getCrc32(data) {
+                let crc = 0 ^ (-1);
+                for (let i = 0; i < data.length; i++) {
+                    crc = (crc >>> 8) ^ crc32Table[(crc ^ data[i]) & 0xFF];
+                }
+                return (crc ^ (-1)) >>> 0;
+            }
+            this.files.forEach(file => {
+                const nameEncoder = new TextEncoder();
+                const nameBytes = nameEncoder.encode(file.name);
+                const crc = getCrc32(file.data);
+                const size = file.data.length;
+                const localHeader = new ArrayBuffer(30 + nameBytes.length);
+                const view = new DataView(localHeader);
+                view.setUint32(0, 0x04034b50, true);
+                view.setUint16(4, 10, true);
+                view.setUint16(6, 0, true);
+                view.setUint16(8, 0, true);
+                view.setUint16(10, 0x3A00, true);
+                view.setUint16(12, 0x5461, true);
+                view.setUint32(14, crc, true);
+                view.setUint32(18, size, true);
+                view.setUint32(22, size, true);
+                view.setUint16(26, nameBytes.length, true);
+                view.setUint16(28, 0, true);
+                new Uint8Array(localHeader, 30).set(nameBytes);
+                bufferParts.push(new Uint8Array(localHeader));
+                bufferParts.push(file.data);
+                const cdHeader = new ArrayBuffer(46 + nameBytes.length);
+                const cdView = new DataView(cdHeader);
+                cdView.setUint32(0, 0x02014b50, true);
+                cdView.setUint16(4, 20, true);
+                cdView.setUint16(6, 10, true);
+                cdView.setUint16(8, 0, true);
+                cdView.setUint16(10, 0, true);
+                cdView.setUint16(12, 0x3A00, true);
+                cdView.setUint16(14, 0x5461, true);
+                cdView.setUint32(16, crc, true);
+                cdView.setUint32(20, size, true);
+                cdView.setUint32(24, size, true);
+                cdView.setUint16(28, nameBytes.length, true);
+                cdView.setUint16(30, 0, true);
+                cdView.setUint16(32, 0, true);
+                cdView.setUint16(34, 0, true);
+                cdView.setUint16(36, 0, true);
+                cdView.setUint32(38, 0, true);
+                cdView.setUint32(42, currentOffset, true);
+                new Uint8Array(cdHeader, 46).set(nameBytes);
+                centralDirectoryParts.push(new Uint8Array(cdHeader));
+                currentOffset += localHeader.byteLength + size;
+            });
+            const cdStartOffset = currentOffset;
+            let cdSize = 0;
+            centralDirectoryParts.forEach(part => {
+                bufferParts.push(part);
+                cdSize += part.byteLength;
+            });
+            const eocd = new ArrayBuffer(22);
+            const eocdView = new DataView(eocd);
+            eocdView.setUint32(0, 0x06054b50, true);
+            eocdView.setUint16(4, 0, true);
+            eocdView.setUint16(6, 0, true);
+            eocdView.setUint16(8, this.files.length, true);
+            eocdView.setUint16(10, this.files.length, true);
+            eocdView.setUint32(12, cdSize, true);
+            eocdView.setUint32(16, cdStartOffset, true);
+            eocdView.setUint16(20, 0, true);
+            bufferParts.push(new Uint8Array(eocd));
+            return new Blob(bufferParts, { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+        };
     }
 </script>
 
