@@ -2,7 +2,7 @@ const CACHE_NAME = 'HTML2Doc';
 const ASSETS = [
   'HTML2Doc_2026.html',
   'manifesthd.json',
-  'iconhd.png'
+  'iconhd1.png'
 ];
 
 self.addEventListener('install', (event) => {
