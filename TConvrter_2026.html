@@ -109,6 +109,11 @@
             // Remove outer <p> tags only
             html = html.replace(/^<p>/i, '').replace(/<\/p>$/i, '');
 
+            // ─── ADD YOUR REPLACEMENTS HERE ──── 
+            html = html.replace(/<strong>/gi, '').replace(/<\/strong>/gi, '');
+            html = html.replace(/<em>/gi, '<i>').replace(/<\/em>/gi, '</i>');
+            // ─── ADD YOUR REPLACEMENTS HERE ──── 
+
             return html;
             });
             
