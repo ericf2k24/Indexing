@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>JConvrter_03</title>
+    <title>JConvrter_2026_01</title>
     <link rel="manifest" href="manifestjc.json">
 
     <script>
@@ -75,17 +75,6 @@
           resize: vertical;
           overflow-y: auto; 
         }
-
-        /* added 20260629 */
-        .subject-header {
-        padding-left: 5pt;
-        text-indent: -10pt;
-        }
-        .preview-div {
-        padding-left: 5pt;
-        text-indent: -10pt;
-        }
-        /* added 20260629 */
 
     </style>
 
@@ -326,7 +315,7 @@
                         }
                         const margin = (k <= 1) ? 0 : (k - 1) * 10;
                         const cls = k === 0 ? "subject-header" : "preview-div";
-                        htmlPreview += `<div class="${cls}" style="margin-left: ${margin}pt; ${colorStyle}">${displayVal}</div>`;
+                        htmlPreview += `<div class="${cls}" style="margin-left: ${margin}pt; padding-left: 5pt; text-indent: -10pt; ${colorStyle}">${displayVal}</div>`;
                         lastS[k] = s[k];
                         for (let j = k + 1; j <= 7; j++) lastS[j] = "";
                     }
@@ -337,12 +326,12 @@
                 let d8 = s[8];
                 let nameMargin = currentHeaderMargin + 10;
                 if (isOnlyInNames && s[9]) { d8 += `, ${s[9]}`; s[9] = null; }
-                htmlPreview += `<div class="preview-div" style="margin-left: ${nameMargin}pt; ${colorStyle}">${d8}</div>`;
+                htmlPreview += `<div class="preview-div" style="margin-left: ${nameMargin}pt; padding-left: 5pt; text-indent: -10pt; ${colorStyle}">${d8}</div>`;
                 lastPrintedMargin = nameMargin;
             }
             if (s[9]) {
                 let jnoMargin = lastPrintedMargin + 10;
-                htmlPreview += `<div class="preview-div" style="margin-left: ${jnoMargin}pt; ${colorStyle}">${s[9]}</div>`;
+                htmlPreview += `<div class="preview-div" style="margin-left: ${jnoMargin}pt; padding-left: 5pt; text-indent: -10pt; ${colorStyle}">${s[9]}</div>`;
             }
         }
         const outDiv = document.getElementById('output');
@@ -464,7 +453,7 @@
         <button class="btn-json post-process-btn" style="display:none;" onclick="saveJsonOutput()">Save JSON</button>
         <br>
         <input type="text" id="fileNameInput2" placeholder="Enter filename..." value="Sorted_J201_00_00" style="display:none; padding: 8px; border-radius: 4px; border: 1px solid #ccc; height: 6px; width: 110px; margin-left: 0px; margin-right: 2px; vertical-align: middle">
-        <button id="dlBtn" class="btn-secondary post-process-btn" style="display:none;" onclick="downloadDoc()">Download .docx</button>
+        <button id="dlBtn" class="btn-secondary post-process-btn" style="display:none;" onclick="downloadDoc()">Download .html</button>
         
         <button class="btn-json post-process-btn" style="display:none;" onclick="copyJsonOutput()">Copy Doc Contents</button>
     </div>
