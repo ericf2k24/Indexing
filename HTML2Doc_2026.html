@@ -3,18 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML2Doc_9</title>
+    <title>HTML2DOC_2026_01</title>
     <link rel="manifest" href="manifesthd.json">
 
     <script>
-      /* how to 
-      
-      
-      -this will downoad an html file
-      -upload file to gdrive or open with google docs or microsoft word
-      -need to save file as .docx
-      
-      */
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('swhd.js')
@@ -34,7 +26,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* min-height: 100vh; */
         }
         .converter-container {
             background-color: #ffffff;
@@ -99,7 +90,7 @@
             border: 1px solid #e2e8f0;
             background: #fafafa;
             border-radius: 4px;
-            max-height: 250px;
+            max-height: 350px;
             overflow-y: auto;
             display: none;
             font-size: 13px;
@@ -109,13 +100,28 @@
             margin-top: 10px;
             font-weight: 500;
         }
+
+        /* --- PREVIEW RENDER INTERCEPT LAYER --- */
+        #previewContent p {
+            margin-top: 0;
+            margin-bottom: 1em;
+        }
+        /* Forces standard framework classes to physically show up in the web preview sandbox */
+        #previewContent .hanging-indent, 
+/*         #previewContent [style*="text-indent:"] {
+            padding-left: 36pt !important;
+            text-indent: -36pt !important;
+        } */
+        #previewContent .indent-1 { padding-left: 36pt !important; }
+        #previewContent .indent-2 { padding-left: 72pt !important; }
+        #previewContent .indent-3 { padding-left: 108pt !important; }
     </style>
 </head>
 <body>
 
 <div class="converter-container">
-    <h2>HTML to Word 9</h2>
-    <p style="font-size: 13px; color: #666;">Convert HTML to Word</p>
+    <h2>HTML2DOC_2026_01</h2>
+    <p style="font-size: 13px; color: #666;">Convert HTML components into an actual, native OpenXML Office document container completely offline with indents, linespacing, font colors, underlines, and per-word italics preserved.</p>
     
     <div class="file-input-wrapper">
         <label style="display:block; font-weight:bold; margin-bottom:8px; font-size:14px;">Select HTML File:</label>
@@ -159,7 +165,6 @@
         reader.readAsText(file);
     }
 
-    // Helper to translate CSS color definitions down to a strict 6-character OpenXML Hex
     function parseColorToHex(colorStr) {
         if (!colorStr) return null;
         const cleanColor = colorStr.trim().toLowerCase();
@@ -179,6 +184,17 @@
             'purple': '800080', 'charcoal': '36454F'
         };
         return colorMap[cleanColor] || null;
+    }
+
+    // Mathematical utility to compute twips safely (1440 twips = 1 inch)
+    function convertToTwips(value, unit) {
+        const val = parseFloat(value);
+        if (isNaN(val)) return 0;
+        if (unit === 'in') return Math.round(val * 1440);
+        if (unit === 'pt') return Math.round(val * 20);
+        if (unit === 'px') return Math.round(val * 15);
+        if (unit === 'em') return Math.round(val * 240); 
+        return 0;
     }
 
     async function convertToWord() {
@@ -211,36 +227,53 @@
 
                     let isBold = el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' || !!el.querySelector('b, strong');
                     let isUnderline = !!el.querySelector('u, ins') || inlineStyleClean.includes('text-decoration:underline');
-                    let size = el.tagName === 'H1' ? '32' : el.tagName === 'H2' ? '28' : '22'; // 16pt, 14pt, 11pt
+                    let size = el.tagName === 'H1' ? '32' : el.tagName === 'H2' ? '28' : '22';
 
-                    // --- INDENTATION PARSING LAYER ---
-                    let indentValue = 0; // Measured in twips (1440 twips = 1 inch)
+                    // --- ENHANCED: INDENTATION & HANGING PARSING LAYER ---
+                    let leftIndentValue = 0; 
+                    let hangingIndentValue = 0;
 
-                    if (el.classList.contains('indent-1') || inlineStyleClean.includes('margin-left:3pt')) {
-                        indentValue = 720;  // 0.5 inches
+                    // A. Check Framework / CSS Structural Helpers
+                    if (el.classList.contains('hanging-indent')) {
+                        leftIndentValue = 720;      // 0.5 inch base indentation default
+                        hangingIndentValue = 720;   // Pull first line back 0.5 inches
+                    } else if (el.classList.contains('indent-1') || inlineStyleClean.includes('margin-left:3pt')) {
+                        leftIndentValue = 720;
                     } else if (el.classList.contains('indent-2') || inlineStyleClean.includes('margin-left:6pt')) {
-                        indentValue = 1440; // 1.0 inch
+                        leftIndentValue = 1440;
                     } else if (el.classList.contains('indent-3') || inlineStyleClean.includes('margin-left:9pt')) {
-                        indentValue = 2160; // 1.5 inches
-                    } else if (inlineStyleClean.includes('margin-left:')) {
-                        const match = styleAttr.match(/margin-left:\s*([0-9.]+)(pt|px|in|em)/i);
-                        if (match) {
-                            const val = parseFloat(match[1]);
-                            const unit = match[2].toLowerCase();
-                            if (unit === 'in') indentValue = Math.round(val * 1440);
-                            else if (unit === 'pt') indentValue = Math.round(val * 20);
-                            else if (unit === 'px') indentValue = Math.round(val * 15);
+                        leftIndentValue = 2160;
+                    }
+
+                    // B. Parse Dynamic Inline CSS Properties 
+                    const leftMatch = styleAttr.match(/(margin-left|padding-left):\s*([0-9.-]+)(pt|px|in|em)/i);
+                    if (leftMatch) {
+                        leftIndentValue = convertToTwips(leftMatch[2], leftMatch[3].toLowerCase());
+                    }
+
+                    const textIndentMatch = styleAttr.match(/text-indent:\s*([0-9.-]+)(pt|px|in|em)/i);
+                    if (textIndentMatch) {
+                        let indentVal = convertToTwips(textIndentMatch[1], textIndentMatch[2].toLowerCase());
+                        if (indentVal < 0) {
+                            hangingIndentValue = Math.abs(indentVal);
+                            // Standard OpenXML Rule: left margin must absorb the hanging total value
+                            if(leftIndentValue === 0 || leftIndentValue < hangingIndentValue) {
+                                leftIndentValue = hangingIndentValue;
+                            }
                         }
                     }
 
-                    let indentXml = indentValue > 0 ? `<w:ind w:left="${indentValue}"/>` : '';
+                    let indentXml = '';
+                    if (leftIndentValue > 0 || hangingIndentValue > 0) {
+                        indentXml = `<w:ind w:left="${leftIndentValue}" ${hangingIndentValue > 0 ? `w:hanging="${hangingIndentValue}"` : ''}/>`;
+                    }
 
-                    // --- NEW: SPACE BEFORE LAYER ---
+                    // --- SPACE BEFORE LAYER ---
                     let spaceBefore = el.classList.contains('subject-header') ? '240' : '0';
 
-                    // --- NEW: LINE SPACING PARSING LAYER ---
-                    let lineSpacingVal = "240";  // Default: Single spacing (240 twips)
-                    let lineRuleVal = "auto";    // Default rule
+                    // --- LINE SPACING PARSING LAYER ---
+                    let lineSpacingVal = "240";  
+                    let lineRuleVal = "auto";    
 
                     if (inlineStyleClean.includes('line-height:')) {
                         const lineMatch = styleAttr.match(/line-height:\s*([0-9.]+)(px|pt|em|%)?/i);
@@ -264,14 +297,14 @@
                         }
                     }
 
-                    // --- NEW: BASE ELEMENT COLOR PARSING ---
+                    // --- BASE ELEMENT COLOR PARSING ---
                     let elementColorHex = null;
                     if (inlineStyleClean.includes('color:')) {
                         const colorMatch = styleAttr.match(/color:\s*([^;]+)/i);
                         if (colorMatch) elementColorHex = parseColorToHex(colorMatch[1]);
                     }
 
-                    // Start paragraph block
+                    // Assemble Paragraph Framework
                     documentBodyXml += `<w:p>
                         <w:pPr>
                             <w:spacing w:before="${spaceBefore}" w:after="20" w:line="${lineSpacingVal}" w:lineRule="${lineRuleVal}"/>
