@@ -315,7 +315,7 @@
                         }
                         const margin = (k <= 1) ? 0 : (k - 1) * 10;
                         const cls = k === 0 ? "subject-header" : "preview-div";
-                        htmlPreview += `<div class="${cls}" style="margin-left: ${margin}pt; padding-left: 5pt; text-indent: -10pt; ${colorStyle}">${displayVal}</div>`;
+                        htmlPreview += `<div class="${cls}" style="margin-left: ${margin}pt; padding-left: 5pt; text-indent: -5pt; ${colorStyle}">${displayVal}</div>`;
                         lastS[k] = s[k];
                         for (let j = k + 1; j <= 7; j++) lastS[j] = "";
                     }
@@ -326,12 +326,12 @@
                 let d8 = s[8];
                 let nameMargin = currentHeaderMargin + 10;
                 if (isOnlyInNames && s[9]) { d8 += `, ${s[9]}`; s[9] = null; }
-                htmlPreview += `<div class="preview-div" style="margin-left: ${nameMargin}pt; padding-left: 5pt; text-indent: -10pt; ${colorStyle}">${d8}</div>`;
+                htmlPreview += `<div class="preview-div" style="margin-left: ${nameMargin}pt; padding-left: 5pt; text-indent: -5pt; ${colorStyle}">${d8}</div>`;
                 lastPrintedMargin = nameMargin;
             }
             if (s[9]) {
                 let jnoMargin = lastPrintedMargin + 10;
-                htmlPreview += `<div class="preview-div" style="margin-left: ${jnoMargin}pt; padding-left: 5pt; text-indent: -10pt; ${colorStyle}">${s[9]}</div>`;
+                htmlPreview += `<div class="preview-div" style="margin-left: ${jnoMargin}pt; padding-left: 5pt; text-indent: -5pt; ${colorStyle}">${s[9]}</div>`;
             }
         }
         const outDiv = document.getElementById('output');
