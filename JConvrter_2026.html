@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>JConvrter_2026_01</title>
+    <title>JConvrter_2026</title>
     <link rel="manifest" href="manifestjc.json">
 
     <script>
@@ -315,8 +315,11 @@
                         }
                         const margin = (k <= 1) ? 0 : (k - 1) * 10;
                         const cls = k === 0 ? "subject-header" : "preview-div";
+                        const subjectSpace = k === 0 ? "margin-top: 15pt;" : ""; // Adds space if it's a header
+                        htmlPreview += `<div class="${cls}" style="margin-left: ${margin}pt; padding-left: 5pt; text-indent: -5pt; ${colorStyle} ${subjectSpace}">${displayVal}</div>`;
+                        /* const cls = k === 0 ? "subject-header" : "preview-div";
                         htmlPreview += `<div class="${cls}" style="margin-left: ${margin}pt; padding-left: 5pt; text-indent: -5pt; ${colorStyle}">${displayVal}</div>`;
-                        lastS[k] = s[k];
+                         */lastS[k] = s[k];
                         for (let j = k + 1; j <= 7; j++) lastS[j] = "";
                     }
                 }
