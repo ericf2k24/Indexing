@@ -2,7 +2,7 @@ const CACHE_NAME = 'HTML_Hyprlnk';
 const ASSETS = [
   'HTML_Hyprlnk_2026.html',
   'manifesthh.json',
-  'iconhh1.png'
+  'iconhh2.png'
 ];
 
 self.addEventListener('install', (event) => {
