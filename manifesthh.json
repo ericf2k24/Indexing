@@ -1,0 +1,22 @@
+{
+  "name": "HTML_Hyprlnk_2026",
+  "short_name": "HTML_Hyprlnk_2026",
+  "description": "A tool for hyperlinking HTML files.",
+  "start_url": "HTML_Hyprlnk_2026.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007bff",
+  "icons": [
+    {
+      "src": "iconhh1.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "iconhh2.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
