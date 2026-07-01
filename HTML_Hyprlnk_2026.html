@@ -20,20 +20,21 @@
 // 6. Copy downloaded file to USB location file location for hyperlink checking
 </script>
   
-<link rel="manifest" href="manifesthh.json">
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('swhh.js')
-        .then(reg => console.log('Service Worker registered!'))
-        .catch(err => console.error('Service Worker registration failed:', err));
-    });
-  }
-</script>
-
 <head>
     <meta charset="UTF-8">
     <title>HTML_Hyprlnk_2026</title>
+
+    <link rel="manifest" href="manifesthh.json">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('swhh.js')
+            .then(reg => console.log('Service Worker registered!'))
+            .catch(err => console.error('Service Worker registration failed:', err));
+        });
+      }
+    </script>
+
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 10px; background: #f4f7f6; color: #333; }
         .container { max-width: 1000px; margin: 5px; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
