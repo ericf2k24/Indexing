@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<script>
+// How to use this tool:
+// 1. Open consolidated index (word document, index list, paragraph form)
+// 2. Save as web page
+// 3. Open created html file in notepad or visual studio code
+// 4. Copy everything and paste in text area (1) of JS_HLink_20260508_01.html
+// 5. Click "Hyperlink"
+// 6. Click Create HTML
+// 7. Copy downloaded file to USB location file location for hyperlink checking
+
+// OR
+// 1. Open this tool
+// 2. Click Choose File
+// 3. Select the saved html file
+// 4. Click Hyperlink
+// 5. Click Create HTML
+// 6. Copy downloaded file to USB location file location for hyperlink checking
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('swhh.js')
+        .then(reg => console.log('Service Worker registered!'))
+        .catch(err => console.error('Service Worker registration failed:', err));
+    });
+  }
+</script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>HTML_Hyprlnk_2026</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 10px; background: #f4f7f6; color: #333; }
+        .container { max-width: 1000px; margin: 5px; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        textarea { width: 100%; height: 200px; margin: 5px 0; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: monospace; }
+        .settings { background: #e9ecef; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .settings h3 { margin-top: 0; padding: 0px; }
+        button { background: #e9ecef; color: black; border: none; margin-right: 10px; padding: 10px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        button:hover { background: #d0d4d7; }
+        label { font-weight: bold; display: block; margin-top: 2px; }
+        .hint { font-size: 0.85em; color: black; margin-bottom: 5px; }
+        h2 { font-size: 1.10em; margin-top: 0; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>HTML_Hyprlnk_20260</h2>
+    <div class="settings">
+        <label>Base URL Path:</label>
+        <input type="text" id="basePath" style="width: 97%; margin: 5px; margin-bottom: 15px; padding: 8px;" value="../201pdf/">
+        <label>Hyperlink Settings (Journal No., File Name, Start Page):</label>
+        <p class="hint">Format: Jxx, filename.pdf, offset_number (one per line)</p>
+        <textarea id="configArea" style="height: 100px;">
+J01, 201_J01.pdf, 1
+J02, 201_J02.pdf, 23
+J03, 201_J03.pdf, 277
+J04, 201_J04.pdf, 345
+J05, 201_J05.pdf, 363
+J06, 201_J06.pdf, 399
+J07, 201_J07.pdf, 515
+J08, 201_J08.pdf, 581
+J09, 201_J09.pdf, 601
+J10, 201_J10.pdf, 633
+J11, 201_J11.pdf, 661
+J12, 201_J12.pdf, 1
+J13, 201_J13.pdf, 17
+J14, 201_J14.pdf, 51
+J15, 201_J15.pdf, 97
+J16, 201_J16.pdf, 471
+J17, 201_J17.pdf, 517
+J18, 201_J18.pdf, 575
+J19, 201_J19.pdf, 629
+J20, 201_J20.pdf, 1
+J21, 201_J21.pdf, 61
+J22, 201_J22.pdf, 125
+J23, 201_J23.pdf, 221
+J24, 201_J24.pdf, 301
+J25, 201_J25.pdf, 345
+J26, 201_J26.pdf, 363
+J27, 201_J27.pdf, 383
+J28, 201_J28.pdf, 397
+J29, 201_J29.pdf, 427
+J30, 201_J30.pdf, 457
+J31, 201_J31.pdf, 511
+J32, 201_J32.pdf, 577
+J33, 201_J33.pdf, 1
+J34, 201_J34.pdf, 87
+J35, 201_J35.pdf, 193
+J36, 201_J36.pdf, 255
+J37, 201_J37.pdf, 329
+J38, 201_J38.pdf, 393
+J39, 201_J39.pdf, 421
+J40, 201_J40.pdf, 0
+J41, 201_J41.pdf, 0
+J42, 201_J42.pdf, 0
+J43, 201_J43.pdf, 0
+J44, 201_J44.pdf, 0
+J45, 201_J45.pdf, 0
+J46, 201_J46.pdf, 0
+J47, 201_J47.pdf, 0
+J48, 201_J48.pdf, 0
+J49, 201_J49.pdf, 0
+J50, 201_J50.pdf, 0
+J51, 201_J51.pdf, 0
+J52, 201_J52.pdf, 0
+J53, 201_J53.pdf, 0
+J54, 201_J54.pdf, 0
+J55, 201_J55.pdf, 0
+J56, 201_J56.pdf, 0
+J57, 201_J57.pdf, 0
+J58, 201_J58.pdf, 0
+J59, 201_J59.pdf, 0
+J60, 201_J60.pdf, 0
+J61, 201_J61.pdf, 0
+J62, 201_J62.pdf, 0
+J63, 201_J63.pdf, 0
+J64, 201_J64.pdf, 0
+J65, 201_J65.pdf, 0
+J66, 201_J66.pdf, 0
+J67, 201_J67.pdf, 0
+J68, 201_J68.pdf, 0
+J69, 201_J69.pdf, 0
+J70, 201_J70.pdf, 0
+J71, 201_J71.pdf, 0
+J72, 201_J72.pdf, 0
+J73, 201_J73.pdf, 0
+J74, 201_J74.pdf, 0
+J75, 201_J75.pdf, 0
+J76, 201_J76.pdf, 0
+J77, 201_J77.pdf, 0
+J78, 201_J78.pdf, 0
+J79, 201_J79.pdf, 0
+J80, 201_J80.pdf, 0
+J81, 201_J81.pdf, 0
+J82, 201_J82.pdf, 0
+J83, 201_J83.pdf, 0
+J84, 201_J84.pdf, 0
+J85, 201_J85.pdf, 0
+J86, 201_J86.pdf, 0
+J87, 201_J87.pdf, 0
+J88, 201_J88.pdf, 0
+J89, 201_J89.pdf, 0
+J90, 201_J90.pdf, 0
+J91, 201_J91.pdf, 0
+J92, 201_J92.pdf, 0
+J93, 201_J93.pdf, 0
+J94, 201_J94.pdf, 0
+J95, 201_J95.pdf, 0
+J96, 201_J96.pdf, 0
+J97, 201_J97.pdf, 0
+J98, 201_J98.pdf, 0
+J99, 201_J99.pdf, 0
+1JS, 201_1JS.pdf, 695
+1MS, 201_1MS.pdf, 0
+2MS, 201_2MS.pdf, 651
+3MS, 201_3MS.pdf, 655
+      </textarea>
+    </div>
+
+    <input type="file" id="fileInput" accept=".html,.htm" style="margin-bottom: 5px; display: block;font-size: 16px; ">
+    <label>Or paste .docx HTML code here:</label>
+    <textarea id="inputArea" placeholder="paste your .docx HTML file here:"></textarea>
+    <button onclick="process()">Hyperlink</button>
+    <button onclick="create1()">Create HTML</button>
+
+    <label>Output:</label>
+    <textarea id="outputArea" readonly></textarea>
+</div>
+
+<script>
+    // Automatically load chosen file contents into the input area
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('inputArea').value = e.target.result;
+        };
+        reader.readAsText(file);
+    });
+
+
+    function process() {
+        const input = document.getElementById('inputArea').value;
+        const configRaw = document.getElementById('configArea').value;
+        const basePath = document.getElementById('basePath').value;
+
+        // Parse configuration into an object
+        const journalMap = {};
+        configRaw.split('\n').forEach(line => {
+            const parts = line.split(',');
+            if (parts.length >= 3) {
+                const jCode = parts[0].trim();
+                journalMap[jCode] = {
+                    fileName: parts[1].trim(),
+                    offset: parseInt(parts[2].trim()) || 0
+                };
+            }
+        });
+
+        /**
+         * Matches patterns like:
+         * J06, p466
+         * 3JS, p466-467
+         * 1NS, p466, 467
+         */
+        const regex = /([a-zA-Z0-9]+),\s+p+([\d]+(?:[-,\s]+\d+)*)/g;
+        const result = input.replace(regex, (match, jCode, pRaw) => {
+            // Get the specific config for this Jxx / 3JS / 1NS
+            const config = journalMap[jCode];
+            if (!config) return match; // If code not in config, don't hyperlink
+            // Extract the first number from the page string
+            const printedPage = parseInt(pRaw.split(/[-,\s]+/)[0]);  
+            // Calculate actual PDF page using the offset
+            // Formula: Actual Page = Printed Page + Offset
+            const actualPage = printedPage - config.offset + 1;
+            const fullUrl = `${basePath}${config.fileName}#page=${actualPage}`;
+            return `<a href="${fullUrl}" target="_blank" style="color: blue; text-decoration: underline;">${match}</a>`;
+        });
+        document.getElementById('outputArea').value = result;
+    }
+</script>
+
+<script>
+    function create1() {
+        const content01 = document.getElementById('outputArea').value;
+        var firstprt01 = 
+      `<!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="Template Mo">
+        <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+        <title>20th Congress</title>
+        <link href="../../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="../../assets/css/fontawesome.css">
+        <link rel="stylesheet" href="../../assets/css/templatemo-edu-meeting.css">
+        <link rel="stylesheet" href="../../assets/css/owl.css">
+        <link rel="stylesheet" href="../../assets/css/lightbox.css">
+      </head>
+
+      <style type="text/css">
+      p.MsoNormal {
+        margin-top:0.0pt;
+        margin-right:0cm;
+        margin-bottom:8.0pt;
+        text-indent: -10pt; /* indention */
+        /*margin-left: 8.65pt;  updated margin-left */
+        /*text-indent: -8.65pt;  added text-indent */
+        line-height:107%;
+        font-size:11.0pt;
+        font-family:'Times New Roman', serif;
+      }
+
+      .subject-header {
+          font-weight: bold;
+          font-size: 11pt;
+          /* text-transform: uppercase; */
+          margin-top: 10pt;
+          text-indent: -10pt; /* indention */
+          font-family:'Times New Roman', serif
+      }
+      .preview-div {
+          font-size: 11pt;
+          line-height: 1.2;
+          margin-bottom: 2pt;
+          text-indent: -10pt; /* indention */
+          font-family:'Times New Roman', serif
+      }
+
+      /* for html from manual consolidation enable this part */
+      p.MsoNormal u {
+        display: block;
+        text-indent: 0.0pt; 
+        margin-left: 0pt; 
+      } 
+      for html from manual consolidation enable this part */ 
+
+      </style>
+
+      <body>
+        <div class="sub-header">
+          <div class="container">
+            <div class="row">
+              <div class="col-lg-8 col-sm-8"></div>
+              <div class="col-lg-4 col-sm-4">
+                <div class="right-icons">
+                  <ul></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <header class="header-area header-sticky">
+          <div class="container">
+            <div class="row">
+              <div class="col-12">
+                <nav class="main-nav">
+                  <a href="../vol.html" class="logo">JOURNAL OF THE HOUSE </a>
+                  <ul class="nav">
+                    <li><a href="../../index.html">Home</a></li>
+                    <li class="has-sub">
+                      <a href="javascript:void(0)">Back to</a>
+                      <ul class="sub-menu">
+                        <li><a href="../vol2.html">Volumes</a></li>
+                        <li><a href="../journalrs.html">Journal Service</a></li>
+                      </ul>
+                      <li><a href="../../about.html">About Us</a></li>
+                      <a class='menu-trigger'><span>Menu</span></a>
+                  </nav>
+              </div>
+            </div>
+          </div>
+        </header>
+        <section class="heading-page header-text" id="top">
+          <div class="container">
+            <div class="row">
+              <div class="col-lg-12">
+                <h6>&nbsp;</h6>
+                <h2>&nbsp;</h2>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="meetings-page" id="meetings">
+          <div class="container">
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="row">
+                  <div class="col-lg-12">
+                    <div class="meeting-single-item">
+                      <div class="thumb">
+                        <div class="price"></div>
+                        <a href="../../meeting-details.html"></a>
+                      </div>
+                      <div class="down-content">
+                        <blockquote>
+                          <h2>First Regular Session</h2>
+                        </blockquote>
+                        <p>July 28, 2025 - June 5, 2026</p>
+                        <p><br>
+                        <div class="row">
+                          <blockquote>
+                            <blockquote>
+                              <blockquote>
+                                <div class="container">
+                                  <div class="media-container-row">
+                                      <div class="mbr-text col-16 mbr-fonts-style" mbr-theme-style="display-5" data-app-selector=".mbr-text" data-multiline mbr-article>
+      <p></p>
+      `; // first part of html code   
+      var lastpart01 = `
+
+      </div>
+                                  </div>
+                                </div>
+                              </blockquote>
+                            </blockquote>
+                          </blockquote>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <p class="MsoNormal" style="margin-bottom:0cm;line-height:normal;">&nbsp;</p>
+        <p class="MsoNormal" style="margin-bottom:0cm;line-height:normal;">&nbsp;</p>
+        <div class="footer">
+          <p>COPYRIGHT © 2026 House of Representatives. ALL RIGHTS RESERVED.<br></p>
+        </div>
+        <script src="../../vendor/jquery/jquery.min.js"></script1>
+        <script src="../../vendor/bootstrap/js/bootstrap.bundle.min.js"></script1>
+        <script src="../../assets/js/isotope.min.js"></script1>
+        <script src="../../assets/js/owl-carousel.js"></script1>
+        <script src="../../assets/js/lightbox.js"></script1>
+        <script src="../../assets/js/tabs.js"></script1>
+        <script src="../../assets/js/video.js"></script1>
+        <script src="../../assets/js/slick-slider.js"></script1>
+        <script src="../../assets/js/custom.js"></script1>
+        <script>
+          //according to loftblog tut
+          $('.nav li:first').addClass('active');
+          var showSection = function showSection(section, isAnimate) 
+          {
+            var
+              direction = section.replace(/#/, ''),
+              reqSection = $('.section').filter('[data-section="' + direction + '"]'),
+              reqSectionPos = reqSection.offset().top - 0;
+              if (isAnimate) 
+              {
+                $('body, html').animate(
+                  {
+                    scrollTop: reqSectionPos 
+                  }, 800);
+              } else 
+              {
+                $('body, html').scrollTop(reqSectionPos);
+              }
+          };
+          var checkSection = function checkSection() 
+          {
+            $('.section').each(function () 
+            {
+              var
+                $this = $(this),
+                topEdge = $this.offset().top - 80,
+                bottomEdge = topEdge + $this.height(),
+                wScroll = $(window).scrollTop();
+                if (topEdge < wScroll && bottomEdge > wScroll) 
+                {
+                  var
+                  currentId = $this.data('section'),
+                  reqLink = $('a').filter('[href*=\\#' + currentId + ']');
+                  reqLink.closest('li').addClass('active').
+                  siblings().removeClass('active');
+                }
+            });
+          };
+          $('.main-menu, .responsive-menu, .scroll-to-section').on('click', 'a', function (e) 
+          {
+            e.preventDefault();
+            showSection($(this).attr('href'), true);
+          });
+
+          $(window).scroll(function () 
+          {
+            checkSection();
+          });
+        </scr` + `ipt>
+      </body>
+      </html>`; // end part of html code
+      const docHeader = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:office:word' xmlns='http://www.w3.org/TR/REC-html40'>\n` +
+            `<head>\n<meta charset='utf-8'>\n<style>\n` +
+            `body { font-family: 'Times New Roman', serif; font-size: 11pt; }\n` +
+            `div { line-height: 1.2; margin-bottom: 2pt; }\n` +
+            `a { color: black; text-decoration: none; }\n` +
+            `</style>\n</head>\n<body>\n`;
+      const docFooter = `\n</body>\n</html>`;
+      const docBlob = new Blob(['\ufeff', docHeader + content01 + docFooter], { type: 'application/msword' });
+      const docLink = document.createElement("a");
+      docLink.href = URL.createObjectURL(docBlob);
+      //docLink.download = 'Hyperlinked_J_Document.doc';
+      //docLink.click();
+      // --- 2. GENERATE THE .HTML FILE ---
+      // We combine the parts you defined in the variables
+      const fullHtmlContent = firstprt01 + content01 + lastpart01; 
+      const htmlBlob = new Blob([fullHtmlContent], { type: 'text/html' });
+      const htmlLink = document.createElement("a");
+      htmlLink.href = URL.createObjectURL(htmlBlob);
+      htmlLink.download = 'Index_Output.html';
+      // Slight delay to ensure the browser handles two downloads at once
+      setTimeout(() => {
+          htmlLink.click();
+      }, 500);
+    }
+</script>
+</body>
+</html>
